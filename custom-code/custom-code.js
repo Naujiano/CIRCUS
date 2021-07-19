@@ -35,39 +35,6 @@ const customjs = {
 					}
                 })
 				
-            },
-            "editRecord" : function (api, pk_id) {
-                api = api
-                editRecord_id = pk_id
-                const $iframe = $('<iframe src="http://localhost//CIRCUS/custom-code/record-edit.html?pk_id=' + pk_id + '"  id="juan" style="position:absolute;top:140px;left:500px;width:400px;height:300px;background:white;z-index:9999"></iframe>')
-                 $('body').prepend($iframe)
-                 window.addEventListener("message", (event)=>{
-                    const data = event.data
-                    const pk_id = data.pk_id
-                    , val = data.val
-                    , query = {
-                        operation: 'update'
-                        , columns: "observaciones"
-                        , values: [val]
-                        , schemaSyntax: "riesgos"
-                        , whereSyntax: "pk_id=" + pk_id
-                        , dbID : 'DBH_coteyser'
-                    }
-                    console.log(query)
-                    $iframe.remove()
-                    return
-                    api.$dbq (query, data => {
-                        console.log(data)
-                    })
-                },false)
-                /*
-                 setTimeout ( function () {
-                    targetWindow = $iframe[0].contentWindow
-                    targetWindow.postMessage({"juan":1},'*')
-    
-                 },1000)
-                 */
-                            
             }
         }
     }

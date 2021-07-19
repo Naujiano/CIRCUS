@@ -23,6 +23,7 @@ export default {
             showAdvanced: false,
             series: {
                 operation: "sobreescribir"
+                , show: false
             },
             checkedIndexes: [],
             admin: this.api.parsedSearch.admin,
@@ -396,6 +397,8 @@ export default {
             this.$refs.popup.show()
         },
         operate_serie2 ( ) {
+            console.log(this.checkedIds)
+            //return 
             const txt = this.$refs.input_mass.value
             , qeSyntax = this.$refs.qe.settings.sqlSyntax
             , joinSyntax = this.tablesRelation.joinSyntax
@@ -403,11 +406,10 @@ export default {
             , tableName = this.tablaPrincipal.tableName //dbNames[0][0]
             , tableAlias = this.tablaPrincipal.tableAlias //dbNames[0][1]
             , field = this.$refs.field_mass.value
-            //, query = "UPDATE " + this.tablesRelation.joinSyntax + " SET " + txt + " WHERE " + this.grid.whereSql
-            //, query = `UPDATE ${tableName} SET ${field} = ${txt} WHERE ${this.pkName} IN ( SELECT ${this.distinct?'DISTINCT ':''} [${tableAlias}].${this.pkName} FROM ${joinSyntax}  ${qeSyntax?'WHERE '+qeSyntax:''})`
-            , query = `UPDATE ${tableName} SET ${field} = ${txt} FROM ${joinSyntax}  ${qeSyntax?'WHERE '+qeSyntax:''}`
-            , historySelect = `SELECT (select max ( cm_id ) FROM CIRCUS_mass),${this.pkName},${field} FROM ${tableName} WHERE ${this.pkName} IN ( SELECT ${this.distinct?'DISTINCT ':''} [${tableAlias}].${this.pkName} FROM ${joinSyntax}  ${qeSyntax?'WHERE '+qeSyntax:''})`
-            , historyCount = `SELECT count(${this.pkName}) as count FROM ${tableName} WHERE ${this.pkName} IN ( SELECT ${this.distinct?'DISTINCT ':''} [${tableAlias}].${this.pkName} FROM ${joinSyntax}  ${qeSyntax?'WHERE '+qeSyntax:''})`
+            , where = this.checkedIds.length ? `WHERE ${this.pkName} IN ( ${this.checkedIds.toString()} )` : ( qeSyntax?'WHERE '+qeSyntax:'' )
+            , query = `UPDATE ${tableName} SET ${field} = ${txt} FROM ${joinSyntax}  ${where}`
+            , historySelect = `SELECT (select max ( cm_id ) FROM CIRCUS_mass),${this.pkName},${field} FROM ${tableName} WHERE ${this.pkName} IN ( SELECT ${this.distinct?'DISTINCT ':''} [${tableAlias}].${this.pkName} FROM ${joinSyntax}  ${where})`
+            , historyCount = `SELECT count(${this.pkName}) as count FROM ${tableName} WHERE ${this.pkName} IN ( SELECT ${this.distinct?'DISTINCT ':''} [${tableAlias}].${this.pkName} FROM ${joinSyntax}  ${where})`
             , circusMassInsert = `INSERT INTO CIRCUS_mass ( cm_table_name , cm_pkfield, cm_field_name , cm_update_sql ) VALUES ( '${tableName}', '${this.pkName}', '${field}', '${query.replace(/'/g,"''")}' )`
             , circusMassHistoryInsert = `INSERT INTO CIRCUS_mass_history ( cmh_cm_id, cmh_pkid,  cmh_value ) ${historySelect}`
             , revertDelete = `delete CIRCUS_mass_history WHERE cmh_cm_id = ( SELECT max ( cm_id ) FROM CIRCUS_mass ) delete CIRCUS_mass WHERE cm_id = ( SELECT max ( cm_id ) FROM CIRCUS_mass )`

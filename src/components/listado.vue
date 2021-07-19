@@ -17,12 +17,13 @@
                     <div v-show="admin"  class="toolbar-box">
                         <div class="toolbar-box-title" style="margin-top:-7px">Series</div>
                                 
-                        
+                        <!--
                                 <select class="form-control" style="width:auto; margin-top: -0px; font-size: 11px; float:left;margin-left:10px" @change="series.operation=$event.target.value"  data-help-code="list-toolbar-series-operation">
                                     <option value="Sobreescribir">Sobreescribir</option>
                                     <option value="Vaciar">Vaciar</option>
                                 </select>
-                                <button class="btn btn-primary btn-xs" data-help-code="list-toolbar-series-run" style="background:transparent;border:0; float:left; outline: none;          box-shadow:none" @click="open_serie($event)"><svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"           x="0px" y="0px" viewBox="0 0 256 256" style="enable-background:new 0 0 256 256;" xml:space="preserve">
+                        -->
+                                <button class="btn btn-primary btn-xs" data-help-code="list-toolbar-series-run" style="background:transparent;border:0; float:left; outline: none;          box-shadow:none" @click="series.show=!series.show"><svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"           x="0px" y="0px" viewBox="0 0 256 256" style="enable-background:new 0 0 256 256;" xml:space="preserve">
 		            	        <path d="M0,128C0,57.3,57.3,0,128,0s128,57.3,128,128s-57.3,128-128,128S0,198.7,0,128z M172.8,68.3c1.2-10.2-6.8-19.1-17.1-19.1
 		            	        	c-8.7,0-16.1,6.6-17.1,15.2c-0.5,4.6,0.8,9.1,3.6,12.7C151.6,88.9,171,83.6,172.8,68.3z M78.3,207.2c3.3-2.5,3.5-3.7,12.2-18.6
 		            	        	c0,0,0-0.1,0.1-0.1c0,0,0,0-0.1,0c4.5-7.7,10.5-18.2,19.1-32.7c0.7,0.4,14.2,6,19.9,9.7c-6.5,4-15.1,9.6-21.3,13.4
@@ -33,15 +34,15 @@
 		            	        </svg></button>
                                
                     </div>
-                    <div v-show="admin"  class="toolbar-box">
+                    <div v-show="admin&&series"  class="toolbar-box">
                         <div class="toolbar-box-title" style="margin-top:-7px">Customm</div>
                         <button v-for="boton in custom_buttons" :title ="boton.label" class="btn btn-primary btn-xs" data-help-code="" style="background:transparent;border:0; float:left; outline: none;box-shadow:none" @click="custom_button_click(boton)"><img :src="boton.image_src" style="width:21px; opacity:0.5"></button>
                     </div>
                 </div>
                 <div style="float:right;display:block;">{{grid.loadedRecsNumber}}/{{grid.rowCount}}</div>
             </div>
-            <div class="toolbar-box-title" style="padding-top:5px;border:0px solid lightgray; border-width: 1px 0 0 0; ">Modificación de datos en masa</div> 
-            <div style="width:100%;display:block;padding: 0px 0;background:#f4f4f4;margin:0; display: flex;">
+            <div v-show="admin&&series.show" class="toolbar-box-title" style="padding-top:5px;border:0px solid lightgray; border-width: 1px 0 0 0; ">Modificación de datos en masa</div> 
+            <div v-show="admin&&series.show" style="width:100%;display:block;padding: 0px 0;background:#f4f4f4;margin:0; display: flex;">
                 <select class="form-control" style="width:auto; margin-top: -0px; font-size: 11px; float:left;margin-left:10px"  data-help-code="list-toolbar-mass-field" ref="field_mass">
                     <option></option>
                     <option v-for="col in qeParams" v-if="col.table_full_name.toLowerCase()==tablaPrincipal.tableName.toLowerCase()":value="col.column_name">{{col.field_full_name}}</option>
