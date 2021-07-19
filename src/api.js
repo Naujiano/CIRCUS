@@ -9,6 +9,8 @@ const parsedSearch = queryString.parse(location.search)
 , apiURL = 	parsedSearch.api
 , hostname = 	parsedSearch.hostname
 , connectionsModel = {};
+//alert(hostname)
+//console.log(hostname )
 var storedVuexStore, vuexStore
 export {vuexStore, parsedSearch, apiURL, hostname }
 
@@ -585,19 +587,24 @@ export function getTablesRelation ( tableName ) {
 		return false
 	}
 	const joinSyntax = `${tableConfig.table_reference} as [${tableConfig.table_alias}]`
-	const relatedGroup = { names: [tableName], joinSyntax: joinSyntax }
+	const relatedGroup = { names: [tableName], dbnames: [[tableConfig.table_reference,tableConfig.table_alias]], joinSyntax: joinSyntax }
 	const relatedTables = getRelatedTables ( tableName )
 	relatedGroup.joinSyntax +=  relatedTables.joinSyntax
 	let nextRelatedNames = relatedTables.names
+	let nextRelatedDbNames = relatedTables.dbnames
 	do {
-		let relatedNames = nextRelatedNames
+		let relatedNames = nextRelatedNames, relatedDbNames = nextRelatedDbNames
+		let i = 0
 		//_.pullAll(relatedNames, relatedGroup.names)
 		nextRelatedNames = []
 		for ( tableName of relatedNames ) {
 			const relatedTables = getRelatedTables ( tableName, relatedGroup.names.concat(relatedNames) )
 			nextRelatedNames = nextRelatedNames.concat(relatedTables.names)
+			nextRelatedDbNames = nextRelatedDbNames.concat(relatedTables.dbnames)
 			relatedGroup.names.push ( tableName )
+			relatedGroup.dbnames.push ( relatedDbNames[i] )
 			relatedGroup.joinSyntax +=  relatedTables.joinSyntax
+			i++
 		}
 	} while ( nextRelatedNames.length )
 	//relatedGroup.names = [tableName].concat ( relatedGroup.names )
@@ -620,6 +627,7 @@ function getRelatedTables ( tableName, excludeNames=[] ) {
 	const tables = circusConfig.tables
 	, table = tables[tableName]
 	, relatedTablesNames = []
+	, relatedTablesDbNames = []
 	, remote_table_reference = remoteTableConfig.table_reference
 	, remote_table_alias = remoteTableConfig.table_alias
 	if ( !table ) return res
@@ -649,6 +657,7 @@ function getRelatedTables ( tableName, excludeNames=[] ) {
 			joinTables += ` ${joinType} ${local_table_reference} AS [${local_table_alias}] ON [${local_table_alias}].[${localField}] =  [${remote_table_alias}].[${remoteField}]`
 			//joinTables += ` ${joinType} ${t1fullname} ${alias} ON ${dbID2}.dbo.${cleanTableName(tableName)}.${localField} =  ${alias2}.${remoteField}`
 		relatedTablesNames.push ( key )
+		relatedTablesDbNames.push ( [local_table_reference, local_table_alias] )
 		involvedTablesNames.push ( key )
 		function isTableRepeated (tn) {
 			return involvedTablesNames.indexOf (tn) != -1
@@ -656,6 +665,7 @@ function getRelatedTables ( tableName, excludeNames=[] ) {
 		//debugger
 	})
 	res.names = relatedTablesNames
+	res.dbnames = relatedTablesDbNames
 	res.joinSyntax = joinTables
 	return res
 }

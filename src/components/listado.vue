@@ -16,7 +16,9 @@
                     </div>
                     <div v-show="admin"  class="toolbar-box">
                         <div class="toolbar-box-title" style="margin-top:-7px">Series</div>
-                                <select class="form-control" style="width:auto; margin-top: -0px; font-size: 11px; float:left;margin-left:10px" @change="series.operation=$event.target.            value"  data-help-code="list-toolbar-series-operation">
+                                
+                        
+                                <select class="form-control" style="width:auto; margin-top: -0px; font-size: 11px; float:left;margin-left:10px" @change="series.operation=$event.target.value"  data-help-code="list-toolbar-series-operation">
                                     <option value="Sobreescribir">Sobreescribir</option>
                                     <option value="Vaciar">Vaciar</option>
                                 </select>
@@ -29,13 +31,32 @@
 		            	        	c-10.7,0-18.5-4.3-28.1-10C118,67.5,90,76.3,75.9,96.1c-8.5,11.8,4.5,22.6,12.8,11c7.8-10.9,17.6-15,29.1-12
 		            	        	c-5.2,9.1-52.1,97.7-52.8,99.3C59.9,204.8,71.5,212.3,78.3,207.2z"></path>
 		            	        </svg></button>
+                               
                     </div>
                     <div v-show="admin"  class="toolbar-box">
                         <div class="toolbar-box-title" style="margin-top:-7px">Customm</div>
-                        <button v-for="boton in custom_buttons" :title ="boton.label" class="btn btn-primary btn-xs" data-help-code="" style="background:transparent;border:0; float:left; outline: none;box-shadow:none" @click="custom_button_click(boton.onclick)"><img :src="boton.image_src" style="width:21px; opacity:0.5"></button>
+                        <button v-for="boton in custom_buttons" :title ="boton.label" class="btn btn-primary btn-xs" data-help-code="" style="background:transparent;border:0; float:left; outline: none;box-shadow:none" @click="custom_button_click(boton)"><img :src="boton.image_src" style="width:21px; opacity:0.5"></button>
                     </div>
                 </div>
                 <div style="float:right;display:block;">{{grid.loadedRecsNumber}}/{{grid.rowCount}}</div>
+            </div>
+            <div class="toolbar-box-title" style="padding-top:5px;border:0px solid lightgray; border-width: 1px 0 0 0; ">Modificación de datos en masa</div> 
+            <div style="width:100%;display:block;padding: 0px 0;background:#f4f4f4;margin:0; display: flex;">
+                <select class="form-control" style="width:auto; margin-top: -0px; font-size: 11px; float:left;margin-left:10px"  data-help-code="list-toolbar-mass-field" ref="field_mass">
+                    <option></option>
+                    <option v-for="col in qeParams" v-if="col.table_full_name.toLowerCase()==tablaPrincipal.tableName.toLowerCase()":value="col.column_name">{{col.field_full_name}}</option>
+                </select>
+                <div style="float:left;margin: -3px 0 0 11px; font-size: 20px">=</div>
+                <input class="form-control" style="flex-grow: 2; width:auto; margin-top: -0px; font-size: 11px; float:left;margin-left:10px" @input="" ref="input_mass">
+                <button class="btn btn-primary btn-xs" data-help-code="list-toolbar-series-run" style="background:transparent;border:0; float:left; outline: none;          box-shadow:none" @click="operate_serie2"><svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"           x="0px" y="0px" viewBox="0 0 256 256" style="enable-background:new 0 0 256 256;" xml:space="preserve">
+		            <path d="M0,128C0,57.3,57.3,0,128,0s128,57.3,128,128s-57.3,128-128,128S0,198.7,0,128z M172.8,68.3c1.2-10.2-6.8-19.1-17.1-19.1
+		            	        	c-8.7,0-16.1,6.6-17.1,15.2c-0.5,4.6,0.8,9.1,3.6,12.7C151.6,88.9,171,83.6,172.8,68.3z M78.3,207.2c3.3-2.5,3.5-3.7,12.2-18.6
+		            	        	c0,0,0-0.1,0.1-0.1c0,0,0,0-0.1,0c4.5-7.7,10.5-18.2,19.1-32.7c0.7,0.4,14.2,6,19.9,9.7c-6.5,4-15.1,9.6-21.3,13.4
+		            	        	c-10,6-4.4,18.7,4.1,18c4.1-0.3,4.9-1.2,20.4-8.9c7.3-3.6,14.8-7.3,20.7-10.9c4.9-2.9,10.9-12.3,3.3-18.9L133.1,142
+		            	        	c5.9-11.3,11.6-21.7,17.4-31.8c19.8,5.7,40.1-0.7,55.2-21.7c5.7-7.9,1.2-15.2-5.1-15.2c-10.4,0-10.2,17.3-32.7,17.3
+		            	        	c-10.7,0-18.5-4.3-28.1-10C118,67.5,90,76.3,75.9,96.1c-8.5,11.8,4.5,22.6,12.8,11c7.8-10.9,17.6-15,29.1-12
+		            	        	c-5.2,9.1-52.1,97.7-52.8,99.3C59.9,204.8,71.5,212.3,78.3,207.2z"></path>
+		        </svg></button>
             </div>
             <div style="position:relative;border:0px solid red;max-height:80%;border:0 solid #ddd;border-width:0px 0 1px 0;margin-top:5px;margin-left:-5px;width:calc(100% + 10px)" class="bgqe" ref="qeContainer">
                 <div v-show="show.queryEditor" class="" style="height:100%;overflow:auto;padding:5px 0;min-height:47px">

@@ -23,7 +23,7 @@
     </div>
 </template>
 <script>
-import SimpleTable from 'D:/data/iis/simple-table/src/components/simple-table.vue'
+import SimpleTable from 'c:/data/iis/simple-table/src/components/simple-table.vue'
 export default {
     components: { SimpleTable },
     props: {

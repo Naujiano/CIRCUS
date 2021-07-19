@@ -1,4 +1,4 @@
-import SimpleTable from 'D:/data/iis/simple-table/src/components/simple-table.vue'
+import SimpleTable from 'c:/data/iis/simple-table/src/components/simple-table.vue'
 import Ly from './layout.vue'
 import ItemEditor from './item-editor.vue'
 import Queryeditor  from './query-editor.vue'
@@ -224,8 +224,12 @@ export default {
             if ( ! this.qeParams ) return []
             const mainTable = this.tablesRelation.joinSyntax.split(" INNER JOIN ")[0]
             , series_parameters = JSON.cc ( this.qeParams.filter(param => {
-                const paramKey = param.reference ? param.reference : param.key
-                return paramKey.toLowerCase().indexOf(mainTable.toLowerCase()) != -1 
+                //const paramKey = param.reference ? param.reference : param.key
+                const paramTable = param.table_name
+                //console.log(paramTable)
+                //return paramKey.toLowerCase().indexOf(mainTable.toLowerCase()) != -1 
+                //return paramTable.toLowerCase().indexOf(mainTable.toLowerCase()) != -1 
+                return 1
             }))
             //series_parameters.forEach ( param => { param.value = ""; param.text = "" } )
             return series_parameters
@@ -254,6 +258,12 @@ export default {
         },
         tablesRelation(){
             return this.api.getTablesRelation ( this.ventana.data.table )
+        },
+        tablaPrincipal(){
+            const dbNames = this.tablesRelation.dbnames
+            , tableName = dbNames[0][0]
+            , tableAlias = dbNames[0][1]
+            return { tableName, tableAlias }
         }
     }
     , beforeUpdate(){
@@ -385,10 +395,106 @@ export default {
         open_serie ( event ) {
             this.$refs.popup.show()
         },
+        operate_serie2 ( ) {
+            const txt = this.$refs.input_mass.value
+            , qeSyntax = this.$refs.qe.settings.sqlSyntax
+            , joinSyntax = this.tablesRelation.joinSyntax
+            //, dbNames = this.tablesRelation.dbnames
+            , tableName = this.tablaPrincipal.tableName //dbNames[0][0]
+            , tableAlias = this.tablaPrincipal.tableAlias //dbNames[0][1]
+            , field = this.$refs.field_mass.value
+            //, query = "UPDATE " + this.tablesRelation.joinSyntax + " SET " + txt + " WHERE " + this.grid.whereSql
+            //, query = `UPDATE ${tableName} SET ${field} = ${txt} WHERE ${this.pkName} IN ( SELECT ${this.distinct?'DISTINCT ':''} [${tableAlias}].${this.pkName} FROM ${joinSyntax}  ${qeSyntax?'WHERE '+qeSyntax:''})`
+            , query = `UPDATE ${tableName} SET ${field} = ${txt} FROM ${joinSyntax}  ${qeSyntax?'WHERE '+qeSyntax:''}`
+            , historySelect = `SELECT (select max ( cm_id ) FROM CIRCUS_mass),${this.pkName},${field} FROM ${tableName} WHERE ${this.pkName} IN ( SELECT ${this.distinct?'DISTINCT ':''} [${tableAlias}].${this.pkName} FROM ${joinSyntax}  ${qeSyntax?'WHERE '+qeSyntax:''})`
+            , historyCount = `SELECT count(${this.pkName}) as count FROM ${tableName} WHERE ${this.pkName} IN ( SELECT ${this.distinct?'DISTINCT ':''} [${tableAlias}].${this.pkName} FROM ${joinSyntax}  ${qeSyntax?'WHERE '+qeSyntax:''})`
+            , circusMassInsert = `INSERT INTO CIRCUS_mass ( cm_table_name , cm_pkfield, cm_field_name , cm_update_sql ) VALUES ( '${tableName}', '${this.pkName}', '${field}', '${query.replace(/'/g,"''")}' )`
+            , circusMassHistoryInsert = `INSERT INTO CIRCUS_mass_history ( cmh_cm_id, cmh_pkid,  cmh_value ) ${historySelect}`
+            , revertDelete = `delete CIRCUS_mass_history WHERE cmh_cm_id = ( SELECT max ( cm_id ) FROM CIRCUS_mass ) delete CIRCUS_mass WHERE cm_id = ( SELECT max ( cm_id ) FROM CIRCUS_mass )`
+            console.log(query)
+            //console.log(historySelect)
+            //console.log(historyCount)
+            //console.log(circusMassInsert)
+            //console.log(circusMassHistoryInsert)
+            //return
+            this.api.$dbq ({
+                sqlSyntax: historyCount
+                , dbID: this.api.getTableConnectionId(this.ventana.data.table)
+            }, data => {
+                const count = data[0].count
+                if ( confirm ( `Si continua modificará ${count} registros con la siguiente asignación:
+                
+                ${field} = ${txt}
+                
+                `))
+                //INSERT EN CIRCUS_mass
+                this.api.$dbq ({
+                    sqlSyntax: circusMassInsert 
+                    , dbID: this.api.getTableConnectionId(this.ventana.data.table)
+                }, data => {
+                    //console.log(data)
+                    if ( data.length ) {
+                        console.log(data[0])
+                        alert ( '\n\nERROR !!!!!!!! \n\n La sentencia no se ha podido ejecutar.')
+                    } else {    
+                        //INSERT EN CIRCUS_mass_history
+                        this.api.$dbq ({
+                            sqlSyntax: circusMassHistoryInsert
+                            , dbID: this.api.getTableConnectionId(this.ventana.data.table)
+                        }, data => {
+                            //console.log(data)
+                            if ( data.length ) {
+                                console.log(data[0])
+                                alert ( '\n\nERROR !!!!!!!! \n\n La sentencia no se ha podido ejecutar.')
+                            } else {    
+                                //MODIFICACION EFECTIVA DE LOS DATOS
+                                this.api.$dbq ({
+                                    sqlSyntax: query
+                                    , dbID: this.api.getTableConnectionId(this.ventana.data.table)
+                                }, data => {
+                                    //console.log(data)
+                                    if ( data.length ) {
+                                        console.log(data[0])
+                                        //REVIERTO EL HISTORICO PORQUE HUBO ERROR EN LA MODIFICACION.
+                                        this.api.$dbq ({
+                                            sqlSyntax: revertDelete
+                                            , dbID: this.api.getTableConnectionId(this.ventana.data.table)
+                                        }, data => {
+                                            //console.log(data)
+                                            if ( data.length ) {
+                                                console.log(data[0])
+                                                alert ( '\n\nERROR !!!!!!!! \n\n La sentencia no se ha podido ejecutar.')
+                                            } else {   
+                                            }
+        
+                                        }, true
+                                        , true)  
+        
+                                        alert ( '\n\nERROR !!!!!!!! \n\n La sentencia no se ha podido ejecutar.')
+                                    } else {    
+                                        alert ( 'Registros modificados correctamente.')
+                                    }
+
+                                }, true
+                                , true)  
+                            }
+                                
+                        }, true
+                        , true)  
+        
+                    }
+                        
+                }, true
+                , true)  
+            }, true
+            , true)            
+        },
         operate_serie ( params ) {
             console.log(this.series.operation)
             console.log(JSON.cc(params))
+            console.log(this.checkedIds)
             if ( ! this.checkedIds || ! this.checkedIds.length ) {
+                alert('a')
                 window.log ( 'Operación cancelada. No hay ningún registro seleccionado.', 'darkorange' )
                 return false
             }
@@ -407,12 +513,14 @@ export default {
             , idField = identities[0]
             if ( ! assigns.length ) {
                 window.log ( 'Operación cancelada. No ha rellenado ningún campo.', 'darkorange' )
+                alert('b')
                 return false
             }
             const updates = this.checkedIds.map ( id => `${sql} WHERE ${idField} = ${id}` )
             var sqlSyntax = ""
             updates.forEach ( update => sqlSyntax += update + ' ')
-            console.log(sqlSyntax)
+            console.log('sqlSyntax')
+            return
             this.api.$dbq ({
                 sqlSyntax
                 , dbID: this.api.getTableConnectionId(this.ventana.data.table)
@@ -516,7 +624,12 @@ export default {
             that.$store.commit ( 'set_contextDialogProps', qeParam )
             window.contextDialog (
                 { qeParam, value: qe.parameters.data[index].key, cb: (txt)=>{
-                    if ( txt ) { //VIENE DEL COMPONENTE contextFieldEditKey
+                    if ( txt.length == 1 ) { //Viene de nombre de la vista
+                        console.log('a')
+                        qe.parameters.data[index].vista = txt[0]
+                        qe.emitParameters()
+                    } else if ( txt ) { //VIENE DEL COMPONENTE contextFieldEditKey
+                        console.log('j')
                         qe.parameters.data[index].key = txt
                         qe.emitParameters()
                     } else { // viene dl componente contextFieldEditList
@@ -527,7 +640,7 @@ export default {
             )
         },
         checkClick(checklist){
-            return
+            //return
             //console.log(checklist)
             const checked_pk_id = []
             /*
@@ -535,16 +648,20 @@ export default {
                 if ( $.inArray ( i, checklist ) != -1 ) checked_pk_id.push ( row.PK_ID )
             })
             */
-            checklist.forEach ( ( index ) => {
-                checked_pk_id.push ( this.grid.rows[index].PK_ID )
+           checklist.forEach ( ( ele, index ) => {
+               checked_pk_id.push ( this.grid.rows[index].PK_ID )
             })
+            //return
             //console.log(checked_pk_id)
             //this.$store.commit ( 'checked_assign', { indexVentana: this.ventana.index, ids: checked_pk_id } )
             this.checkedIds = checked_pk_id
-            this.checkedIndexes = checklist
+            console.log(checked_pk_id)
+            //this.checkedIndexes = checklist
             //this.$store.commit ( 'log', checklist.length + ' registros marcados.' )
         },
-        custom_button_click ( ref ) {
+        custom_button_click ( boton ) {
+            customjs.buttons.onclick[boton.onclick](this.api,this.selected_pk_id)
+            return
             if ( ref == "getDocument" ) customjs.buttons.onclick.getDocument(this.api,this.selected_pk_id)
             if ( ref == "editRecord" ) customjs.buttons.onclick.editRecord(this.api,this.selected_pk_id)
         },

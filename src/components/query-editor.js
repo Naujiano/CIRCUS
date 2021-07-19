@@ -65,6 +65,7 @@ export default class queryEditor {
                 , query = this.getQueryByName ( vista )
                 const joinSyntax = query.joinSyntax
                 , whereSql = query.whereSql
+                console.log(query)
                 val = ` ${param.key} on( SELECT ${campo} FROM ${joinSyntax} ${whereSql} )`
                 //sqlSyntax += ` ${param.operator} ${param.leftText} ${val} ${param.rightText}`
             } else if (isInlineSelect) {

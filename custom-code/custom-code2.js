@@ -3,38 +3,59 @@ const customjs = {
     "buttons" : {
         "onclick" : {
             "revertHistory" : function (api, pk_id) {
-                //alert('a')
-				if ( ! confirm ( 'Si continua modificará en masa registros para devolveros a estado seleccionado.' ) ) return false
+                alert('a')
+				/*
+				const historySelect = `SELECT * from circus_mass inner join cirucs_mass_history on cm_id = cmh_cm_id`
+				, historyRevertUpdate = `update ${cm_table_name} SET ${cm_field_name} = cmh_value FROM circus_mass inner join cirucs_mass_history on cm_id = cmh_cm_id innerjoin ${cm_table_name} on cmh_pkid = ${cm_pkfield} `
                 api.$dbq ({
                     operation: 'select'
-                    , columns: ['cm_table_name', 'cm_field_name', 'cm_pkfield']
-                    , schemaSyntax: `circus_mass`
+                    , columns: ['cm_table_name','cm_pkfield']
+                    , schemaSyntax: `circus_mass inner join cirucs_mass_history on cm_id = cmh_cm_id`
                     , whereSyntax: 'cm_id = ' + pk_id
-                    , dbID : 'vsegbas_COT'
+                    , dbID : 'DBH_coteyser'
                 }, data => {
- 					if (!data[0]) {
+                    console.log(data)
+					if (!data[0]) {
 						alert('No hay un historico disponible.')
 						return false
 					} else {
-						const cm_table_name = data[0].cm_table_name
-						, cm_field_name = data[0].cm_field_name
-						, cm_pkfield = data[0].cm_pkfield
-						, historyRevertUpdate = `update ${cm_table_name} SET ${cm_field_name} = cmh_value FROM circus_mass inner join circus_mass_history on cm_id = cmh_cm_id inner join ${cm_table_name} on cmh_pkid = ${cm_pkfield} `
 						api.$dbq ({
-							sqlSyntax: historyRevertUpdate //+ 'aaa'
-							, dbID : 'vsegbas_COT'
+							sqlSyntax: historyRevertUpdate
+							, dbID : 'DBH_coteyser'
 						}, data => {
-							if (data.length) {
-								console.log(data)
+							console.log(data)
+							if (data[0]) {
 								alert('El procedimiento ha fallado.')
 								return false
 							} else {
 								alert ( 'Se han revertido los datos correctamente. ' )
 							}
-						}, true, 'request')
+						})
 					}
                 })
-				
+				*/
+            },
+            "getDocument" : function (api, pk_id) {
+                alert('ggg')
+                const fields = "doc_nombrearchivo,doc_nombreoriginal"
+                , joinSyntax = "personas_documentos pd INNER JOIN dbh_documentos on doc_pkvalue = pd.perdoc_id INNER JOIN view_documentos_exigidos_union_hijos de ON de.perdoc_id = doc_pkvalue" 
+                , whereSyntax = `de.id = ${pk_id} and doc_da_id = 105` // 105 es el area de Documentos de la figura 
+                api.$dbq ({
+                    operation: 'select'
+                    , columns: fields
+                    , schemaSyntax: joinSyntax
+                    , whereSyntax: whereSyntax
+                    , dbID : 'DBH_coteyser'
+                }, data => {
+                    console.log(data)
+					if (!data[0]) {
+						alert('No hay documento que cumpla esta exigencia.')
+						return false
+					}
+					const doc_nombrearchivo = data[0].doc_nombrearchivo
+					, doc_nombreoriginal = data[0].doc_nombreoriginal
+                    window.open(api.hostname+"/node/express/circus_server/dbhdoc?file=" + doc_nombrearchivo + "&filename=" + doc_nombreoriginal)
+                })
             },
             "editRecord" : function (api, pk_id) {
                 api = api

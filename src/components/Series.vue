@@ -95,6 +95,7 @@ export default {
             state = JSON.cc(state)
             const field = this.parameters[state.paramIndex]
             field.text = state.text
+            console.log(state)
             if ( ! field.series ) field.series = {}
             field.series.replaceValue = state.value
             //window.contextList.closeContext()

@@ -5,6 +5,11 @@
             <b>{{componentProps.reference}}</b>
         </div>
         <textarea ref="textarea" style="resize:none; overflow: hidden;" @input="oninput()" :value="qeParam.key"></textarea>  
+        <div class="encabezado">
+            <div style="text-transform:uppercase">Filtrar por esta vista<br></div>
+            <b>{{componentProps.reference}}</b>
+        </div>
+        <textarea ref="textareaVista" style="resize:none; overflow: hidden;" @input="oninput('vista')" :value="qeParam.vista"></textarea>  
     </div>
 </template>
 <script>
@@ -51,9 +56,17 @@ export default {
             ,  qeParam = this.componentProps.qeParam
             qeParam.key = event.target
         },
-        oninput() {
-            const element = this.$refs.textarea
-            , txt = element.value
+        oninput(opcion) {
+            let txt 
+            , element 
+            console.log('opcion'+opcion)
+            if ( opcion == 'vista' ) {
+                element = this.$refs.textareaVista
+                txt = [element.value]
+            } else {
+                element = this.$refs.textarea
+                txt = element.value
+            }
             this.auto_grow(element)
             if ( this.componentProps.cb ) this.componentProps.cb(txt)
         },
