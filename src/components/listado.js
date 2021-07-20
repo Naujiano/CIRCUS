@@ -410,7 +410,7 @@ export default {
             , query = `UPDATE ${tableName} SET ${field} = ${txt} FROM ${joinSyntax}  ${where}`
             , historySelect = `SELECT (select max ( cm_id ) FROM CIRCUS_mass),${this.pkName},${field} FROM ${tableName} WHERE ${this.pkName} IN ( SELECT ${this.distinct?'DISTINCT ':''} [${tableAlias}].${this.pkName} FROM ${joinSyntax}  ${where})`
             , historyCount = `SELECT count(${this.pkName}) as count FROM ${tableName} WHERE ${this.pkName} IN ( SELECT ${this.distinct?'DISTINCT ':''} [${tableAlias}].${this.pkName} FROM ${joinSyntax}  ${where})`
-            , circusMassInsert = `INSERT INTO CIRCUS_mass ( cm_table_name , cm_pkfield, cm_field_name , cm_update_sql ) VALUES ( '${tableName}', '${this.pkName}', '${field}', '${query.replace(/'/g,"''")}' )`
+            , circusMassInsert = `INSERT INTO CIRCUS_mass ( cm_table_name , cm_pkfield, cm_field_name , cm_replace_value , cm_update_sql ) VALUES ( '${tableName}', '${this.pkName}', '${field}', '${txt.replace(/'/g,"''")}', '${query.replace(/'/g,"''")}' )`
             , circusMassHistoryInsert = `INSERT INTO CIRCUS_mass_history ( cmh_cm_id, cmh_pkid,  cmh_value ) ${historySelect}`
             , revertDelete = `delete CIRCUS_mass_history WHERE cmh_cm_id = ( SELECT max ( cm_id ) FROM CIRCUS_mass ) delete CIRCUS_mass WHERE cm_id = ( SELECT max ( cm_id ) FROM CIRCUS_mass )`
             console.log(query)
