@@ -165,12 +165,9 @@ function createStore (storedVuexStore) {
 		const estado = JSON.cc(state)//{...state}
 		delete estado.fieldsMap
 		console.log(estado)
-		//console.log('d')
 		//localStorage.clear();
 		localStorage["vuexStore"] = JSON.stringify(estado)
-		//console.log('e') 
 		resetApiStore()
-		//setDatabaseMaps()
 		console.log('Commit to Vuex.')
 		//saveConfigFile ()
 		//saveCircusConfig()
