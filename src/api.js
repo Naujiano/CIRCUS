@@ -120,6 +120,7 @@ function createStore (storedVuexStore) {
 	delete vuexTree.state["database.lists.vsegbas.dbo.CLIENTES.CLI_Estado"]
 	delete vuexTree.state["database.lists['vsegbas.dbo.CLIENTES.CLI_Estado']"]
 	delete vuexTree.state.tablesMap
+	delete vuexTree.state.fieldsMap
 	//vuexTree = { state: JSON.parse(storedVuexStore), ...actions }
 	//vuexTree = { state: JSON.parse(storedVuexStore), ...actions }
 	//vuexTree = { state: JSON.parse(storedVuexStore), ...actions }
@@ -148,23 +149,26 @@ function createStore (storedVuexStore) {
 	})
 	//}
 	//vuexTree = {}
-	console.log('a')
+	//vuexTree = JSON.cc ( vuexTree )
+	//console.log ( vuexTree.state.fieldsMap )
+	//console.log( JSON.cc ( vuexTree.state ) )
+	//console.log( JSON.cc ( vuexTree.state ) )
+	//vuexTree.state = JSON.cc ( vuexTree.state )
 	vuexStore = new Vuex.Store(vuexTree)
-	console.log('b')
-	//console.log(JSON.stringify(vuexTree.state))
+	//console.log( vuexTree.state )
 	//localStorage.clear();
 	localStorage["vuexStore"] = JSON.stringify(JSON.cc(vuexTree.state))
-	console.log('c') 
 	window.vuex = vuexTree.state 
-
+	//console.log(vuexTree)
 
 	vuexStore.subscribe((mutation, state) => {
 		const estado = JSON.cc(state)//{...state}
+		delete estado.fieldsMap
 		console.log(estado)
-		console.log('d')
+		//console.log('d')
 		//localStorage.clear();
 		localStorage["vuexStore"] = JSON.stringify(estado)
-		console.log('e') 
+		//console.log('e') 
 		resetApiStore()
 		//setDatabaseMaps()
 		console.log('Commit to Vuex.')

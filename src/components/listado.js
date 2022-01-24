@@ -407,12 +407,12 @@ export default {
             , tableAlias = this.tablaPrincipal.tableAlias //dbNames[0][1]
             , field = this.$refs.field_mass.value
             , where = this.checkedIds.length ? `WHERE ${this.pkName} IN ( ${this.checkedIds.toString()} )` : ( qeSyntax?'WHERE '+qeSyntax:'' )
-            , query = `UPDATE ${tableName} SET ${field} = ${txt} FROM ${joinSyntax}  ${where}`
+            , query = `set dateformat dmy UPDATE ${tableName} SET ${field} = ${txt} FROM ${joinSyntax}  ${where}`
             , historySelect = `SELECT (select max ( cm_id ) FROM CIRCUS_mass),${this.pkName},${field} FROM ${tableName} WHERE ${this.pkName} IN ( SELECT ${this.distinct?'DISTINCT ':''} [${tableAlias}].${this.pkName} FROM ${joinSyntax}  ${where})`
-            , historyCount = `SELECT count(${this.pkName}) as count FROM ${tableName} WHERE ${this.pkName} IN ( SELECT ${this.distinct?'DISTINCT ':''} [${tableAlias}].${this.pkName} FROM ${joinSyntax}  ${where})`
-            , circusMassInsert = `INSERT INTO CIRCUS_mass ( cm_table_name , cm_pkfield, cm_field_name , cm_replace_value , cm_update_sql ) VALUES ( '${tableName}', '${this.pkName}', '${field}', '${txt.replace(/'/g,"''")}', '${query.replace(/'/g,"''")}' )`
-            , circusMassHistoryInsert = `INSERT INTO CIRCUS_mass_history ( cmh_cm_id, cmh_pkid,  cmh_value ) ${historySelect}`
-            , revertDelete = `delete CIRCUS_mass_history WHERE cmh_cm_id = ( SELECT max ( cm_id ) FROM CIRCUS_mass ) delete CIRCUS_mass WHERE cm_id = ( SELECT max ( cm_id ) FROM CIRCUS_mass )`
+            , historyCount = `set dateformat dmy SELECT count(${this.pkName}) as count FROM ${tableName} WHERE ${this.pkName} IN ( SELECT ${this.distinct?'DISTINCT ':''} [${tableAlias}].${this.pkName} FROM ${joinSyntax}  ${where})`
+            , circusMassInsert = `set dateformat dmy INSERT INTO CIRCUS_mass ( cm_table_name , cm_pkfield, cm_field_name , cm_replace_value , cm_update_sql ) VALUES ( '${tableName}', '${this.pkName}', '${field}', '${txt.replace(/'/g,"''")}', '${query.replace(/'/g,"''")}' )`
+            , circusMassHistoryInsert = `set dateformat dmy INSERT INTO CIRCUS_mass_history ( cmh_cm_id, cmh_pkid,  cmh_value ) ${historySelect}`
+            , revertDelete = `set dateformat dmy delete CIRCUS_mass_history WHERE cmh_cm_id = ( SELECT max ( cm_id ) FROM CIRCUS_mass ) delete CIRCUS_mass WHERE cm_id = ( SELECT max ( cm_id ) FROM CIRCUS_mass )`
             console.log(query)
             //console.log(historySelect)
             //console.log(historyCount)
